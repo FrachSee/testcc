@@ -1,42 +1,52 @@
 // Import the data to customize and insert them into page
 const fetchData = () => {
-  fetch("customize.json")
-    .then(data => data.json())
+  fetch("./customize.json")
+    .then(res => {
+      if (!res.ok) throw new Error("customize.json not found");
+      return res.json();
+    })
     .then(data => {
-      dataArr = Object.keys(data);
-      dataArr.map(customData => {
+      const dataArr = Object.keys(data);
+
+      dataArr.forEach(customData => {
         if (data[customData] !== "") {
           if (customData === "imagePath") {
-            document
-              .querySelector(`[data-node-name*="${customData}"]`)
-              .setAttribute("src", data[customData]);
+            const el = document.querySelector(`[data-node-name*="${customData}"]`);
+            if (el) el.setAttribute("src", data[customData]);
           } else {
-            document.querySelector(`[data-node-name*="${customData}"]`).innerText = data[customData];
+            const el = document.querySelector(`[data-node-name*="${customData}"]`);
+            if (el) el.innerText = data[customData];
           }
         }
-
-        // Check if the iteration is over
-        // Run amimation if so
-        if ( dataArr.length === dataArr.indexOf(customData) + 1 ) {
-          animationTimeline();
-        } 
       });
+
+      // JSON 成功加载后启动动画
+      animationTimeline();
+    })
+    .catch(err => {
+      // 失败也不要白屏：直接跑默认动画
+      console.warn("Load customize.json failed:", err);
+      animationTimeline();
     });
 };
 
 // Animation Timeline
 const animationTimeline = () => {
-  // Spit chars that needs to be animated individually
+  // Split chars that needs to be animated individually
   const textBoxChars = document.getElementsByClassName("hbd-chatbox")[0];
   const hbd = document.getElementsByClassName("wish-hbd")[0];
 
-  textBoxChars.innerHTML = `<span>${textBoxChars.innerHTML
-    .split("")
-    .join("</span><span>")}</span`;
+  if (textBoxChars) {
+    textBoxChars.innerHTML = `<span>${textBoxChars.innerHTML
+      .split("")
+      .join("</span><span>")}</span`;
+  }
 
-  hbd.innerHTML = `<span>${hbd.innerHTML
-    .split("")
-    .join("</span><span>")}</span`;
+  if (hbd) {
+    hbd.innerHTML = `<span>${hbd.innerHTML
+      .split("")
+      .join("</span><span>")}</span`;
+  }
 
   const ideaTextTrans = {
     opacity: 0,
@@ -87,7 +97,6 @@ const animationTimeline = () => {
     .from(".three", 0.7, {
       opacity: 0,
       y: 10
-      // scale: 0.7
     })
     .to(
       ".three",
@@ -232,7 +241,6 @@ const animationTimeline = () => {
       {
         opacity: 0,
         y: -50,
-        // scale: 0.3,
         rotation: 150,
         skewX: "30deg",
         ease: Elastic.easeOut.config(1, 0.5)
@@ -294,9 +302,11 @@ const animationTimeline = () => {
 
   // Restart Animation on click
   const replyBtn = document.getElementById("replay");
-  replyBtn.addEventListener("click", () => {
-    tl.restart();
-  });
+  if (replyBtn) {
+    replyBtn.addEventListener("click", () => {
+      tl.restart();
+    });
+  }
 };
 
 // ===============================
@@ -307,40 +317,33 @@ const setupBgm = () => {
   const btn = document.getElementById("musicToggle");
   if (!audio || !btn) return;
 
-  // iOS/Safari: helps reduce "not allowed" issues
   audio.preload = "auto";
   audio.loop = true;
 
   const render = () => {
     const playing = !audio.paused;
     btn.classList.toggle("is-playing", playing);
+    // ✅ 不用 \uXXXX，直接用真实字符，避免乱码
     btn.textContent = playing ? "🔊 暂停音乐" : "🔊 播放音乐";
   };
 
-  // Try autoplay in multiple moments (some browsers allow after load/visibility change)
   const tryPlay = async () => {
     try {
       await audio.play();
     } catch (err) {
-      // Autoplay may be blocked; that's okay
+      // Autoplay may be blocked; ignore
     }
     render();
   };
 
-  // 1) Try as soon as possible
+  // 尽量自动播放（能播就播）
   tryPlay();
-
-  // 2) Try again when page fully loaded
-  window.addEventListener("load", () => {
-    tryPlay();
-  });
-
-  // 3) Try again when tab becomes visible (sometimes helps on mobile)
+  window.addEventListener("load", () => tryPlay());
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) tryPlay();
   });
 
-  // 4) Most reliable: first user interaction anywhere on the page
+  // ✅ 最可靠：用户第一次点击/触摸/按键后，立刻解锁播放
   const unlock = () => {
     tryPlay();
     document.removeEventListener("click", unlock);
@@ -351,7 +354,7 @@ const setupBgm = () => {
   document.addEventListener("touchstart", unlock, { once: true });
   document.addEventListener("keydown", unlock, { once: true });
 
-  // Button toggles play/pause
+  // 按钮切换播放/暂停
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
     try {
@@ -361,13 +364,11 @@ const setupBgm = () => {
         audio.pause();
       }
     } catch (err) {
-      // If play fails, user can tap once anywhere (unlock) then tap button again
       console.warn("BGM play failed:", err);
     }
     render();
   });
 
-  // Keep button state in sync
   audio.addEventListener("play", render);
   audio.addEventListener("pause", render);
   render();
