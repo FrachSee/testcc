@@ -63,14 +63,14 @@ const animationTimeline = () => {
     skewX: "-15deg"
   };
 
-  // ✅ 判断移动端：你项目里 CSS 用的也是 max-width: 500px
+  // 判断移动端（与你的 CSS 断点一致）
   const isMobile = window.matchMedia("(max-width: 500px)").matches;
 
   const tl = new TimelineMax();
 
-  // ✅ 移动端整体节奏放慢（保证不会“全片太快”）
+  // ✅ 移动端整体只慢一点点（比之前快很多）
   if (isMobile) {
-    tl.timeScale(0.70); // 0.70 = 慢 30%，你可改 0.6 更慢 / 0.8 更快
+    tl.timeScale(0.85); // 0.85：更接近原速；想再快点改 0.9
   }
 
   tl
@@ -283,19 +283,19 @@ const animationTimeline = () => {
       "party"
     )
 
-    // ✅ 核心：移动端把背景特效“变慢 + 拉开间隔”
+    // ✅ 核心：移动端仅把速度从“太快”拉到“舒服”，但不会“拖”
     .staggerTo(
       ".eight svg",
-      isMobile ? 3.4 : 1.5, // 移动端更长
+      isMobile ? 2.4 : 1.5, // 原来 1.5，移动端变成 2.4（更舒服但不慢）
       {
         visibility: "visible",
-        opacity: 0,
-        scale: isMobile ? 55 : 80,          // 变化幅度也更温和
-        repeat: isMobile ? 2 : 3,           // 少一些轮次
-        repeatDelay: isMobile ? 2.8 : 1.4,  // 每次之间间隔更久
-        ease: Power1.easeOut                // 节奏更柔
+        opacity: 0,                 // ✅ 保持原始亮度逻辑（不额外压暗）
+        scale: 80,                  // ✅ 保持最初效果（你说希望和最初一样）
+        repeat: isMobile ? 2 : 3,   // 移动端少一点轮次，减少“密集变化”
+        repeatDelay: isMobile ? 2.0 : 1.4, // 间隔稍拉开
+        ease: Power1.easeOut
       },
-      isMobile ? 0.75 : 0.3                // 每个圈出现间隔更大（显著减“快”）
+      isMobile ? 0.45 : 0.3 // 原来 0.3，移动端改 0.45：更不密集，但不会太空
     )
 
     .to(".six", 0.5, {
@@ -348,14 +348,12 @@ const setupBgm = () => {
     render();
   };
 
-  // 尽量自动播放（能播就播）
   tryPlay();
   window.addEventListener("load", () => tryPlay());
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) tryPlay();
   });
 
-  // ✅ 最可靠：用户第一次点击/触摸/按键后，立刻解锁播放
   const unlock = () => {
     tryPlay();
     document.removeEventListener("click", unlock);
@@ -366,7 +364,6 @@ const setupBgm = () => {
   document.addEventListener("touchstart", unlock, { once: true });
   document.addEventListener("keydown", unlock, { once: true });
 
-  // 按钮切换播放/暂停
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
     try {
