@@ -335,9 +335,6 @@ const setupBgm = () => {
   audio.addEventListener("pause", render);
   render();
 };
-
-setupBgm();
-fetchData();
 const bgm = document.getElementById("bgm");
 
 function tryPlayBgm() {
