@@ -10,12 +10,13 @@ const fetchData = () => {
 
       dataArr.forEach(customData => {
         if (data[customData] !== "") {
+          const el = document.querySelector(`[data-node-name*="${customData}"]`);
+          if (!el) return;
+
           if (customData === "imagePath") {
-            const el = document.querySelector(`[data-node-name*="${customData}"]`);
-            if (el) el.setAttribute("src", data[customData]);
+            el.setAttribute("src", data[customData]);
           } else {
-            const el = document.querySelector(`[data-node-name*="${customData}"]`);
-            if (el) el.innerText = data[customData];
+            el.innerText = data[customData];
           }
         }
       });
@@ -62,7 +63,15 @@ const animationTimeline = () => {
     skewX: "-15deg"
   };
 
+  // ✅ 判断移动端：你项目里 CSS 用的也是 max-width: 500px
+  const isMobile = window.matchMedia("(max-width: 500px)").matches;
+
   const tl = new TimelineMax();
+
+  // ✅ 移动端整体节奏放慢（保证不会“全片太快”）
+  if (isMobile) {
+    tl.timeScale(0.70); // 0.70 = 慢 30%，你可改 0.6 更慢 / 0.8 更快
+  }
 
   tl
     .to(".container", 0.1, {
@@ -273,18 +282,22 @@ const animationTimeline = () => {
       },
       "party"
     )
+
+    // ✅ 核心：移动端把背景特效“变慢 + 拉开间隔”
     .staggerTo(
       ".eight svg",
-      1.5,
+      isMobile ? 3.4 : 1.5, // 移动端更长
       {
         visibility: "visible",
         opacity: 0,
-        scale: 80,
-        repeat: 3,
-        repeatDelay: 1.4
+        scale: isMobile ? 55 : 80,          // 变化幅度也更温和
+        repeat: isMobile ? 2 : 3,           // 少一些轮次
+        repeatDelay: isMobile ? 2.8 : 1.4,  // 每次之间间隔更久
+        ease: Power1.easeOut                // 节奏更柔
       },
-      0.3
+      isMobile ? 0.75 : 0.3                // 每个圈出现间隔更大（显著减“快”）
     )
+
     .to(".six", 0.5, {
       opacity: 0,
       y: 30,
@@ -323,7 +336,6 @@ const setupBgm = () => {
   const render = () => {
     const playing = !audio.paused;
     btn.classList.toggle("is-playing", playing);
-    // ✅ 不用 \uXXXX，直接用真实字符，避免乱码
     btn.textContent = playing ? "🔊 暂停音乐" : "🔊 播放音乐";
   };
 
