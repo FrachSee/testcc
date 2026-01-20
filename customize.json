@@ -1,23 +1,28 @@
 {
   "greeting": "Hiya",
-  "name": "Lydia",
-  "greetingText": "I really like your name btw!",
-  "wishText": "May the js.prototypes always be with you! ;)",
+  "name": "Dear Mom",
+  "greetingText": "这是一份想送给你的小小生日祝福。",
+  "wishText": "愿你每天平安、健康、心里常有温暖与笑容 ❤️",
   "imagePath": "img/lydia2.png",
-  "text1": "It's your birthday!!! :D",
-  "textInChatBox": "Happy birthday to you!! Yeee! Many many happy blah...",
-  "sendButtonLabel": "Send",
-  "text2": "That's what I was going to do.",
-  "text3": "But then I stopped.",
-  "text4": "I realised, I wanted to do something",
-  "text4Adjective": "special",
-  "text5Entry": "Because,",
-  "text5Content": "You are Special",
-  "smiley": ":)",
-  "bigTextPart1": "S",
-  "bigTextPart2": "O",
-  "wishHeading": "Happy Birthday!",
-  "outroText": "Okay, now come back and tell me if you liked it.",
-  "replayText": "Or click, if you want to watch it again.",
-  "outroSmiley": ":)"
+
+  "text1": "今天，是一个特别的日子 🎂",
+  "textInChatBox": "生日快乐，妈妈！希望你能感受到我的心意 💐",
+  "sendButtonLabel": "发送",
+
+  "text2": "我想了很久，",
+  "text3": "想用一种不太一样的方式，",
+  "text4": "来对你说一句",
+  "text4Adjective": "生日快乐",
+  "text5Entry": "因为，",
+  "text5Content": "你对我来说，一直都是最重要的人",
+
+  "smiley": "❤️",
+
+  "bigTextPart1": "谢",
+  "bigTextPart2": "谢",
+
+  "wishHeading": "Happy Birthday, Dear Mom 🎉",
+  "outroText": "希望这个小小的祝福，能让你感到温暖和开心。",
+  "replayText": "如果你愿意，可以再看一遍 😊",
+  "outroSmiley": "💖"
 }
