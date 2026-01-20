@@ -338,3 +338,15 @@ const setupBgm = () => {
 
 setupBgm();
 fetchData();
+const bgm = document.getElementById("bgm");
+
+function tryPlayBgm() {
+  bgm.play().catch(() => {
+    // 如果被浏览器拦截，这里不会报错给用户，只是播不了
+  });
+  document.removeEventListener("click", tryPlayBgm);
+  document.removeEventListener("touchstart", tryPlayBgm);
+}
+
+document.addEventListener("click", tryPlayBgm);
+document.addEventListener("touchstart", tryPlayBgm);
