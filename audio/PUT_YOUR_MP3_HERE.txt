@@ -1,0 +1,6 @@
+Put your background music file here.
+
+1) Rename your music file to: bgm.mp3
+2) Place it in this audio/ folder.
+
+Then open index.html in a browser.
