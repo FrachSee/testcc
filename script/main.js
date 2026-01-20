@@ -292,9 +292,6 @@ const animationTimeline = () => {
       "+=1"
     );
 
-  // tl.seek("currentStep");
-  // tl.timeScale(2);
-
   // Restart Animation on click
   const replyBtn = document.getElementById("replay");
   replyBtn.addEventListener("click", () => {
@@ -302,19 +299,59 @@ const animationTimeline = () => {
   });
 };
 
-// Run fetch and animation in sequence
-// Background music controls
+// ===============================
+// Background music (more reliable)
+// ===============================
 const setupBgm = () => {
   const audio = document.getElementById("bgm");
   const btn = document.getElementById("musicToggle");
   if (!audio || !btn) return;
 
+  // iOS/Safari: helps reduce "not allowed" issues
+  audio.preload = "auto";
+  audio.loop = true;
+
   const render = () => {
     const playing = !audio.paused;
     btn.classList.toggle("is-playing", playing);
-    btn.textContent = playing ? "\ud83d\udd0a \u6682\u505c\u97f3\u4e50" : "\ud83d\udd0a \u64ad\u653e\u97f3\u4e50";
+    btn.textContent = playing ? "🔊 暂停音乐" : "🔊 播放音乐";
   };
 
+  // Try autoplay in multiple moments (some browsers allow after load/visibility change)
+  const tryPlay = async () => {
+    try {
+      await audio.play();
+    } catch (err) {
+      // Autoplay may be blocked; that's okay
+    }
+    render();
+  };
+
+  // 1) Try as soon as possible
+  tryPlay();
+
+  // 2) Try again when page fully loaded
+  window.addEventListener("load", () => {
+    tryPlay();
+  });
+
+  // 3) Try again when tab becomes visible (sometimes helps on mobile)
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) tryPlay();
+  });
+
+  // 4) Most reliable: first user interaction anywhere on the page
+  const unlock = () => {
+    tryPlay();
+    document.removeEventListener("click", unlock);
+    document.removeEventListener("touchstart", unlock);
+    document.removeEventListener("keydown", unlock);
+  };
+  document.addEventListener("click", unlock, { once: true });
+  document.addEventListener("touchstart", unlock, { once: true });
+  document.addEventListener("keydown", unlock, { once: true });
+
+  // Button toggles play/pause
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
     try {
@@ -324,7 +361,7 @@ const setupBgm = () => {
         audio.pause();
       }
     } catch (err) {
-      // Autoplay policies: if play fails, user may need to click again after the page is focused
+      // If play fails, user can tap once anywhere (unlock) then tap button again
       console.warn("BGM play failed:", err);
     }
     render();
@@ -335,15 +372,7 @@ const setupBgm = () => {
   audio.addEventListener("pause", render);
   render();
 };
-const bgm = document.getElementById("bgm");
 
-function tryPlayBgm() {
-  bgm.play().catch(() => {
-    // 如果被浏览器拦截，这里不会报错给用户，只是播不了
-  });
-  document.removeEventListener("click", tryPlayBgm);
-  document.removeEventListener("touchstart", tryPlayBgm);
-}
-
-document.addEventListener("click", tryPlayBgm);
-document.addEventListener("touchstart", tryPlayBgm);
+// Run fetch and animation in sequence
+fetchData();
+setupBgm();
